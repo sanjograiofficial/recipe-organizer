@@ -1,91 +1,98 @@
 import type { Request, Response } from "express";
-import prisma from "../db/prisma.js";
 import bcrypt from "bcrypt";
-import { hasSubscribers } from "node:diagnostics_channel";
+import asyncHandler from "../middleware/asyncHandler.js";
+import type { Prisma } from "../generated/prisma/client.js";
+import {
+  deleteUserService,
+  getAllUsersService,
+  getMeService,
+  getUserByIdService,
+  updateUserService,
+} from "../service/user.service.js";
 
-const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        username: true,
-        role: true,
-      },
-    });
-    res.status(200).json({
-      message: "All users fetched",
-      data: users,
-    });
-  } catch (e) {
-    res.status(400).json({
-      message: "Failed to fetch users",
-      error: e,
+const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
+  const users = await getAllUsersService();
+  res.status(200).json({
+    message: "All users fetched",
+    data: users,
+  });
+});
+
+const getMe = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
     });
   }
-};
-
-const getUserById = async (req: Request, res: Response) => {
-  try {
-    const id = req.user?.id;
-    const user = await prisma.user.findUnique({
-      where: {
-        id: Number(id),
-      },
-    });
-    res.status(200).json({
-      message: "User fetched successfully",
-      data: user,
-    });
-  } catch (e) {
-    res.status(400).json({
-      message: "Failed to fetch user",
-      error: e,
+  const id = req.user.id;
+  const user = await getMeService(Number(id));
+  res.status(200).json({
+    message: "User fetched successfully",
+    data: user,
+  });
+});
+const getUserById = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
     });
   }
-};
+  const { id } = req.params;
+  const user = await getUserByIdService(Number(id));
+  res.status(200).json({
+    message: "User fetched successfully",
+    data: user,
+  });
+});
 
-const updateUser = async (req: Request, res: Response) => {
-  const id = req.user?.id;
+const updateUser = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+  const id = req.user.id;
   const { username, email, password } = req.body;
-  let hashedPassword;
+  const updateData: Prisma.UserUpdateInput = {};
+
+  if (username !== undefined) {
+    updateData.username = username;
+  }
+
+  if (email !== undefined) {
+    updateData.email = email;
+  }
+
   if (password) {
-    hashedPassword = await bcrypt.hash(password, 10);
+    updateData.password = await bcrypt.hash(password, 10);
+  }
 
-    const user = await prisma.user.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        username,
-        email,
-        password: hashedPassword!,
-      },
+  if (Object.keys(updateData).length === 0) {
+    return res.status(400).json({
+      message: "No fields provided to update",
     });
   }
-};
 
-const deleteUser = async (req: Request, res: Response) => {
-  try {
-    const id = req.user?.id;
-    const user = await prisma.user.delete({
-      where: {
-        id: Number(id),
-      },
-      select: {
-        username: true,
-        email: true,
-        role: true,
-      },
-    });
-    res.status(200).json({
-      message: "User deleted successfully",
-      data: user,
-    });
-  } catch (e) {
-    res.status(400).json({
-      message: "Failed to delete user",
-      error: e,
+  const user = await updateUserService(Number(id), updateData);
+
+  return res.status(200).json({
+    message: "User updated successfully",
+    data: user,
+  });
+});
+
+const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
     });
   }
-};
+  const id = req.user.id;
+  const user = await deleteUserService(Number(id));
+  res.status(200).json({
+    message: "User deleted successfully",
+    data: user,
+  });
+});
 
-export { getAllUsers, getUserById, updateUser, deleteUser };
+export { getAllUsers, getMe, getUserById, updateUser, deleteUser };
