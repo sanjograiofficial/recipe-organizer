@@ -1,35 +1,44 @@
 import type { Request, Response } from "express";
-import prisma from "../db/prisma.js";
 import bcrypt from "bcrypt";
-import { hasSubscribers } from "node:diagnostics_channel";
 import asyncHandler from "../middleware/asyncHandler.js";
 import type { Prisma } from "../generated/prisma/client.js";
+import {
+  deleteUserService,
+  getAllUsersService,
+  getMeService,
+  getUserByIdService,
+  updateUserService,
+} from "../service/user.service.js";
 
 const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany({
-    select: {
-      username: true,
-      role: true,
-    },
-  });
+  const users = await getAllUsersService();
   res.status(200).json({
     message: "All users fetched",
     data: users,
   });
 });
 
-const getUserById = asyncHandler(async (req: Request, res: Response) => {
+const getMe = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
     return res.status(401).json({
       message: "Unauthorized",
     });
   }
   const id = req.user.id;
-  const user = await prisma.user.findUnique({
-    where: {
-      id: Number(id),
-    },
+  const user = await getMeService(Number(id));
+  res.status(200).json({
+    message: "User fetched successfully",
+    data: user,
   });
+});
+const getUserById = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+  const { id } = req.params;
+  const user = await getUserByIdService(Number(id));
   res.status(200).json({
     message: "User fetched successfully",
     data: user,
@@ -64,17 +73,7 @@ const updateUser = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  const user = await prisma.user.update({
-    where: {
-      id: Number(id),
-    },
-    data: updateData,
-    select: {
-      id: true,
-      username: true,
-      role: true,
-    },
-  });
+  const user = await updateUserService(Number(id), updateData);
 
   return res.status(200).json({
     message: "User updated successfully",
@@ -89,20 +88,11 @@ const deleteUser = asyncHandler(async (req: Request, res: Response) => {
     });
   }
   const id = req.user.id;
-  const user = await prisma.user.delete({
-    where: {
-      id: Number(id),
-    },
-    select: {
-      username: true,
-      email: true,
-      role: true,
-    },
-  });
+  const user = await deleteUserService(Number(id));
   res.status(200).json({
     message: "User deleted successfully",
     data: user,
   });
 });
 
-export { getAllUsers, getUserById, updateUser, deleteUser };
+export { getAllUsers, getMe, getUserById, updateUser, deleteUser };

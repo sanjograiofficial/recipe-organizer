@@ -1,29 +1,47 @@
 import prisma from "../db/prisma.js";
 import type { Prisma } from "../generated/prisma/client.js";
+import type { Difficulty, Categories } from "../generated/prisma/client.js";
 
-const getAllRecipesService = async () => {
-  return await prisma.recipe.findMany();
-};
+const getAllRecipesService = () => prisma.recipe.findMany();
 
-const getRecipeByIdService = async (id: number) => {
-  return await prisma.recipe.findUnique({
+const getRecipeByIdService = (id: number) => {
+  return prisma.recipe.findUnique({
     where: {
       id,
     },
   });
 };
 
-const createRecipeService = async (data: Prisma.RecipeCreateInput) => {
-  return await prisma.recipe.create({
+type CreateRecipeDTO = {
+  title: string;
+  description?: string;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
+  difficulty?: Difficulty;
+  category?: Categories;
+  image?: string;
+  userId: number;
+};
+
+const createRecipeService = (data: CreateRecipeDTO) => {
+  return prisma.recipe.create({
     data,
   });
 };
 
 const updateRecipeService = async (
   id: number,
+  userId: number,
   data: Prisma.RecipeUpdateInput,
 ) => {
-  return await prisma.recipe.update({
+  const recipe = await prisma.recipe.findUnique({
+    where: { id },
+  });
+  if (!recipe) throw new Error("Recipe not found");
+  if (recipe.userId !== userId) throw new Error("Forbidden");
+
+  return prisma.recipe.update({
     where: {
       id,
     },
@@ -31,14 +49,13 @@ const updateRecipeService = async (
   });
 };
 
-const deleteRecipeService = async (id: number) => {
-  return await prisma.recipe.delete({
+const deleteRecipeService = (id: number) => {
+  return prisma.recipe.delete({
     where: {
       id,
     },
   });
 };
-
 export {
   getAllRecipesService,
   getRecipeByIdService,

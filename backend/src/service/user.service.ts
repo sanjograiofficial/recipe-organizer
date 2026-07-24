@@ -1,20 +1,34 @@
 import prisma from "../db/prisma.js";
 import type { Prisma } from "../generated/prisma/client.js";
 
-const getAllUsersService = async () => {
-  return await prisma.user.findMany();
+const getAllUsersService = () => {
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      role: true,
+    },
+  });
 };
 
-const getUserByIdService = async (id: number) => {
-  return await prisma.user.findUnique({
+const getMeService = (id: number) => {
+  return prisma.user.findUnique({
     where: {
       id,
     },
   });
 };
 
-const updateUserService = async (id: number, data: Prisma.UserUpdateInput) => {
-  return await prisma.user.update({
+const getUserByIdService = (id: number) => {
+  return prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+};
+
+const updateUserService = (id: number, data: Prisma.UserUpdateInput) => {
+  return prisma.user.update({
     where: {
       id,
     },
@@ -22,8 +36,8 @@ const updateUserService = async (id: number, data: Prisma.UserUpdateInput) => {
   });
 };
 
-const deleteUserService = async (id: number) => {
-  return await prisma.user.delete({
+const deleteUserService = (id: number) => {
+  return prisma.user.delete({
     where: {
       id,
     },
@@ -32,6 +46,7 @@ const deleteUserService = async (id: number) => {
 
 export {
   getAllUsersService,
+  getMeService,
   getUserByIdService,
   updateUserService,
   deleteUserService,
