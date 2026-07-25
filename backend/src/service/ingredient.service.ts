@@ -1,6 +1,5 @@
 import prisma from "../db/prisma.js";
 import type { Prisma } from "../generated/prisma/client.js";
-import type { Difficulty, Categories } from "../generated/prisma/client.js";
 
 type CreateIngredientDTO = {
   name: string;
