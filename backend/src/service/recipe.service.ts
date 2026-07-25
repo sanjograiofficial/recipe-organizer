@@ -41,7 +41,7 @@ const updateRecipeService = async (
   if (!recipe) throw new Error("Recipe not found");
   if (recipe.userId !== userId) throw new Error("Forbidden");
 
-  return prisma.recipe.update({
+  return await prisma.recipe.update({
     where: {
       id,
     },
@@ -49,8 +49,13 @@ const updateRecipeService = async (
   });
 };
 
-const deleteRecipeService = (id: number) => {
-  return prisma.recipe.delete({
+const deleteRecipeService = async(id: number, userId: number) => {
+  const recipe = await prisma.recipe.findUnique({
+    where: { id },
+  });
+  if (!recipe) throw new Error("Recipe not found");
+  if (recipe.userId !== userId) throw new Error("Forbidden");
+  return await prisma.recipe.delete({
     where: {
       id,
     },

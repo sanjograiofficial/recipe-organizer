@@ -118,18 +118,7 @@ const deleteRecipe = asyncHandler(async (req: Request, res: Response) => {
       message: "Unauthorized",
     });
   }
-  const recipe = await getRecipeByIdService(Number(id));
-  if (!recipe)
-    return res.status(404).json({
-      message: "Recipe not found",
-    });
-
-  if (recipe.userId !== req.user.id) {
-    return res.status(403).json({
-      message: "Forbidden",
-    });
-  }
-  const deletedRecipe = await deleteRecipeService(Number(id));
+  const deletedRecipe = await deleteRecipeService(Number(id), req.user.id);
   res.status(200).json({
     message: "Deleted recipe successfully",
     data: deletedRecipe,
