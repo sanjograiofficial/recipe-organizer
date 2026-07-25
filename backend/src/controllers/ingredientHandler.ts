@@ -36,7 +36,7 @@ const updateIngredient = asyncHandler(async (req: Request, res: Response) => {
       message: "Unauthorized",
     });
   }
-  const { id, recipeId } = req.params;
+  const { id } = req.params;
 
   const updateData: Prisma.IngredientUpdateInput = {};
 
@@ -66,7 +66,10 @@ const deleteIngredient = asyncHandler(async (req: Request, res: Response) => {
       message: "Unauthorized",
     });
   }
-  const deletedIngredient = await deleteIngredientService(Number(id), req.user.id);
+  const deletedIngredient = await deleteIngredientService(
+    Number(id),
+    req.user.id,
+  );
   res.status(200).json({
     message: "Deleted ingredient successfully",
     data: deletedIngredient,
