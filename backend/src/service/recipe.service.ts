@@ -2,12 +2,34 @@ import prisma from "../db/prisma.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import type { Difficulty, Categories } from "../generated/prisma/client.js";
 
-const getAllRecipesService = () => prisma.recipe.findMany();
+const getAllRecipesService = () =>
+  prisma.recipe.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      ingredients: true,
+      steps: true,
+    },
+  });
 
 const getRecipeByIdService = (id: number) => {
   return prisma.recipe.findUnique({
     where: {
       id,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      ingredients: true,
+      steps: true,
     },
   });
 };
@@ -46,10 +68,20 @@ const updateRecipeService = async (
       id,
     },
     data,
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      ingredients: true,
+      steps: true,
+    },
   });
 };
 
-const deleteRecipeService = async(id: number, userId: number) => {
+const deleteRecipeService = async (id: number, userId: number) => {
   const recipe = await prisma.recipe.findUnique({
     where: { id },
   });
@@ -58,6 +90,16 @@ const deleteRecipeService = async(id: number, userId: number) => {
   return await prisma.recipe.delete({
     where: {
       id,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+      ingredients: true,
+      steps: true,
     },
   });
 };

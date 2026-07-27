@@ -38,7 +38,7 @@ const updateIngredientService = async (
   });
 };
 
-const deleteIngredientService = async (id: number, userId:number) => {
+const deleteIngredientService = async (id: number, userId: number) => {
   const ingredient = await prisma.ingredient.findUnique({
     where: { id },
     include: {

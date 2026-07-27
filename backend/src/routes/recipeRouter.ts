@@ -20,9 +20,9 @@ router.put("/:id", authMiddleware, updateRecipe);
 router.delete("/:id", authMiddleware, deleteRecipe);
 
 // for ingredient
-router.post("/:recipeId/ingredients", addIngredientToRecipe);
+router.post("/:recipeId/ingredients", authMiddleware, addIngredientToRecipe);
 
 // for step
-router.post("/:recipeId/steps", addStepToRecipe);
+router.post("/:recipeId/steps", authMiddleware, addStepToRecipe);
 
 export default router;
