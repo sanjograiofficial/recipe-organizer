@@ -6,6 +6,7 @@ import {
   deleteIngredientService,
   updateIngredientService,
 } from "../service/ingredient.service.js";
+import { log } from "node:console";
 
 const addIngredientToRecipe = asyncHandler(
   async (req: Request, res: Response) => {
@@ -22,6 +23,7 @@ const addIngredientToRecipe = asyncHandler(
       recipeId: Number(recipeId),
       userId: req.user.id,
     });
+    log(createdIngredient)
     res.status(201).json({
       message: "Created ingredient successfully",
       data: createdIngredient,

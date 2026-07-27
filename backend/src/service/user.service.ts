@@ -7,6 +7,15 @@ const getAllUsersService = () => {
       id: true,
       username: true,
       role: true,
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
     },
   });
 };
@@ -16,6 +25,17 @@ const getMeService = (id: number) => {
     where: {
       id,
     },
+    include: {
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
+    },
   });
 };
 
@@ -23,6 +43,17 @@ const getUserByIdService = (id: number) => {
   return prisma.user.findUnique({
     where: {
       id,
+    },
+    include: {
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
     },
   });
 };
@@ -33,6 +64,17 @@ const updateUserService = (id: number, data: Prisma.UserUpdateInput) => {
       id,
     },
     data,
+    include: {
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
+    },
   });
 };
 
@@ -40,6 +82,17 @@ const deleteUserService = (id: number) => {
   return prisma.user.delete({
     where: {
       id,
+    },
+    include: {
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
     },
   });
 };
