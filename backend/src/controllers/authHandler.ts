@@ -3,12 +3,16 @@ import prisma from "../db/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { registerUserValidationSchema } from "../validators/userValidator.js";
 
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) throw new Error("Secret key undefined");
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+  // zod validation
+  const { username, email, password } = registerUserValidationSchema.parse(
+    req.body,
+  );
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const existingUser = await prisma.user.findUnique({
