@@ -8,6 +8,7 @@ import {
   getRecipeByIdService,
   updateRecipeService,
 } from "../service/recipe.service.js";
+import { idValidator } from "../validators/idValidator.js";
 
 const getAllRecipes = asyncHandler(async (req: Request, res: Response) => {
   const recipes = await getAllRecipesService();
@@ -22,7 +23,10 @@ const getAllRecipes = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getRecipeById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  // zod validation
+  const  id  = idValidator.parse(req.params.id);
+  
+  // get recipe by id
   const recipe = await getRecipeByIdService(Number(id));
   if (!recipe)
     return res.status(404).json({
