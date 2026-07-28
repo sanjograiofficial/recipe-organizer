@@ -6,12 +6,12 @@ const content = z
   .max(64, "Content shouldn't exceed 64 characters");
 const order = z.coerce.number().int().nonnegative();
 
-export const addIngredientValidationSchema = z.object({
+export const addStepValidationSchema = z.object({
   order,
   content,
 });
 
-export const updateIngredientValidationSchema = z.object({
+export const updateSteptValidationSchema = z.object({
   order: order.optional(),
   content: content.optional(),
 });

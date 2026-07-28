@@ -3,7 +3,10 @@ import prisma from "../db/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { registerUserValidationSchema } from "../validators/userValidator.js";
+import {
+  LoginUserValidationSchema,
+  registerUserValidationSchema,
+} from "../validators/userValidator.js";
 
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) throw new Error("Secret key undefined");
@@ -14,7 +17,10 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     req.body,
   );
 
+  // password hashing
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  // check if a user with that email already exists
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
@@ -24,6 +30,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
       message: "Email already exists",
     });
   }
+
+  // create user with that email
   const user = await prisma.user.create({
     data: {
       username,
@@ -42,7 +50,10 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const loginUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  // zod validation
+  const { email, password } = LoginUserValidationSchema.parse(req.body);
+
+  // check if the user with that email exists or not
   const user = await prisma.user.findUnique({
     where: {
       email: email,
@@ -52,15 +63,20 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     return res.status(404).json({
       message: "Invalid email or password",
     });
+
+  // user exists, now checking if password is correct
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch)
     return res.status(401).json({
       message: "Invalid email or password",
     });
 
+  // generate a token for the logged in user
   const token = jwt.sign({ id: user.id }, secretKey, {
     expiresIn: "3d",
   });
+
+  // remove password from user when giving response for security
   const { password: _, ...safeUser } = user;
 
   res.status(200).json({
