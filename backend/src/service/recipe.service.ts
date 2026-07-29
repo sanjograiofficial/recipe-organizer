@@ -36,19 +36,34 @@ const getRecipeByIdService = (id: number) => {
 
 type CreateRecipeDTO = {
   title: string;
-  description?: string;
-  prepTime?: number;
-  cookTime?: number;
-  servings?: number;
-  difficulty?: Difficulty;
-  category?: Categories;
-  image?: string;
+  description?: string | undefined;
+  prepTime?: number | undefined;
+  cookTime?: number | undefined;
+  servings?: number | undefined;
+  difficulty?: Difficulty | undefined;
+  category?: Categories | undefined;
+  image?: string | undefined;
   userId: number;
 };
 
 const createRecipeService = (data: CreateRecipeDTO) => {
+  const { userId, ...recipeData } = data;
   return prisma.recipe.create({
-    data,
+    data: {
+      ...recipeData,
+      description: recipeData.description ?? null,
+      prepTime: recipeData.prepTime ?? null,
+      cookTime: recipeData.cookTime ?? null,
+      servings: recipeData.servings ?? null,
+      difficulty: recipeData.difficulty ?? null,
+      category: recipeData.category ?? null,
+      image: recipeData.image ?? null,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
   });
 };
 

@@ -9,6 +9,7 @@ import {
   updateRecipeService,
 } from "../service/recipe.service.js";
 import { idValidator } from "../validators/idValidator.js";
+import { createRecipeValidationSchema } from "../validators/recipeValidator.js";
 
 const getAllRecipes = asyncHandler(async (req: Request, res: Response) => {
   const recipes = await getAllRecipesService();
@@ -24,8 +25,8 @@ const getAllRecipes = asyncHandler(async (req: Request, res: Response) => {
 
 const getRecipeById = asyncHandler(async (req: Request, res: Response) => {
   // zod validation
-  const  id  = idValidator.parse(req.params.id);
-  
+  const id = idValidator.parse(req.params.id);
+
   // get recipe by id
   const recipe = await getRecipeByIdService(Number(id));
   if (!recipe)
@@ -39,29 +40,19 @@ const getRecipeById = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const createRecipe = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    title,
-    description,
-    prepTime,
-    cookTime,
-    servings,
-    difficulty,
-    category,
-    image,
-  } = req.body;
+  // zod validation
+  const data = createRecipeValidationSchema.parse(req.body);
+
+  // check if user is logged in and has payload
   if (!req.user)
     return res.status(401).json({
       message: "Unauthorized",
     });
+
+  // create recipe
   const recipe = await createRecipeService({
-    title,
-    description,
-    prepTime,
-    cookTime,
-    servings,
-    difficulty,
-    category,
-    image,
+    ...data,
+    image: req.file ? `/uploads/${req.file.filename}` : undefined,
     userId: req.user.id,
   });
   res.status(201).json({
@@ -79,7 +70,6 @@ const updateRecipe = asyncHandler(async (req: Request, res: Response) => {
     servings,
     difficulty,
     category,
-    image,
   } = req.body;
   if (!req.user) {
     return res.status(401).json({
@@ -97,7 +87,6 @@ const updateRecipe = asyncHandler(async (req: Request, res: Response) => {
   if (servings !== undefined) updateData.servings = servings;
   if (difficulty !== undefined) updateData.difficulty = difficulty;
   if (category !== undefined) updateData.category = category;
-  if (image !== undefined) updateData.image = image;
 
   if (Object.keys(updateData).length === 0) {
     return res.status(400).json({

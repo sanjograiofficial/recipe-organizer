@@ -16,9 +16,6 @@ const difficulty = z.enum(["EASY", "MEDIUM", "HARD"]).optional();
 const category = z
   .enum(["BREAKFAST", "LUNCH", "DINNER", "DESSERT", "SNACKS", "DRINKS"])
   .optional();
-const password = z
-  .string()
-  .min(6, "Password should be at least 6 characters long");
 
 export const createRecipeValidationSchema = z.object({
   title,
