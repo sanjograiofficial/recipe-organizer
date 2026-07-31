@@ -1,3 +1,4 @@
+import type { Request } from "express";
 import prisma from "../db/prisma.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import type { Difficulty, Categories } from "../generated/prisma/client.js";
@@ -96,6 +97,28 @@ const updateRecipeService = async (
   });
 };
 
+const updateRecipeImageService = async (
+  id: number,
+  userId: number,
+  imageUrl: string,
+) => {
+  const existingRecipe = await prisma.recipe.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existingRecipe) throw new Error("No recipe found with that id");
+
+  return await prisma.recipe.update({
+    where: {
+      id,
+    },
+    data: {
+      image: imageUrl,
+    },
+  });
+};
+
 const deleteRecipeService = async (id: number, userId: number) => {
   const recipe = await prisma.recipe.findUnique({
     where: { id },
@@ -123,5 +146,6 @@ export {
   getRecipeByIdService,
   createRecipeService,
   updateRecipeService,
+  updateRecipeImageService,
   deleteRecipeService,
 };

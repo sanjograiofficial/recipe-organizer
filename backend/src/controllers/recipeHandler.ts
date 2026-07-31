@@ -6,6 +6,7 @@ import {
   deleteRecipeService,
   getAllRecipesService,
   getRecipeByIdService,
+  updateRecipeImageService,
   updateRecipeService,
 } from "../service/recipe.service.js";
 import { idValidator } from "../validators/idValidator.js";
@@ -104,6 +105,24 @@ const updateRecipe = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+const updateRecipeImage = asyncHandler(async (req: Request, res: Response) => {
+  // zod validation
+  const id = idValidator.parse(req.params.id);
+  if (!req.user)
+    return res.status(401).json({
+      message: "Forbidden",
+    });
+
+  const imageUrl = `/uploads/${req.file?.filename}`;
+
+  // add image to recipe
+  const recipe = await updateRecipeImageService(id, req.user.id, imageUrl);
+  res.status(200).json({
+    message: "Updated recipe successfully",
+    data: recipe,
+  });
+});
+
 const deleteRecipe = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   if (!req.user) {
@@ -123,5 +142,6 @@ export {
   getRecipeById,
   createRecipe,
   updateRecipe,
+  updateRecipeImage,
   deleteRecipe,
 };
