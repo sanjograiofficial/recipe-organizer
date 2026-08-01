@@ -8,6 +8,7 @@ import {
   getMeService,
   getUserByIdService,
   updateUserService,
+  uploadProfileService,
 } from "../service/user.service.js";
 import { idValidator } from "../validators/idValidator.js";
 import { UpdateUserValidationSchema } from "../validators/userValidator.js";
@@ -46,13 +47,6 @@ const getMe = asyncHandler(async (req: Request, res: Response) => {
 const getUserById = asyncHandler(async (req: Request, res: Response) => {
   // zod validation
   const id = idValidator.parse(req.params.id);
-
-  // check if user is logged in and has payload
-  if (!req.user) {
-    return res.status(401).json({
-      message: "Unauthorized",
-    });
-  }
 
   // get user by id
   const user = await getUserByIdService(Number(id));
@@ -100,13 +94,38 @@ const updateUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // update user
-  const user = await updateUserService(Number(id), updateData);
+  const user = await updateUserService(Number(id), req.user.id, updateData);
 
   return res.status(200).json({
     message: "User updated successfully",
     data: user,
   });
 });
+
+const uploadProfile = async (req: Request, res: Response) => {
+  // zod validation
+  const id = idValidator.parse(req.params.id);
+
+  // check if user is logged in and has payload
+  if (!req.user)
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+
+  // check if file is uploaded
+  if (!req.file)
+    return res.status(400).json({
+      message: "No image uploaded",
+    });
+
+  const imageUrl = `/uploads/profiles/${req.file?.filename}`;
+
+  const user = await uploadProfileService(id, req.user.id, imageUrl);
+  res.status(200).json({
+    message: "Uploaded successfully",
+    data: user,
+  });
+};
 
 const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   // check if user is logged in and has payload
@@ -120,11 +139,18 @@ const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const id = req.user.id;
 
   // delete user
-  const user = await deleteUserService(Number(id));
+  const user = await deleteUserService(Number(id), req.user.id);
   res.status(200).json({
     message: "User deleted successfully",
     data: user,
   });
 });
 
-export { getAllUsers, getMe, getUserById, updateUser, deleteUser };
+export {
+  getAllUsers,
+  getMe,
+  getUserById,
+  updateUser,
+  uploadProfile,
+  deleteUser,
+};

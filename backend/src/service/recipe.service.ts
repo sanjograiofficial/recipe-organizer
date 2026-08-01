@@ -109,6 +109,8 @@ const updateRecipeImageService = async (
   });
   if (!existingRecipe) throw new Error("No recipe found with that id");
 
+  if (userId !== existingRecipe.userId) throw new Error("Forbidden");
+
   return await prisma.recipe.update({
     where: {
       id,

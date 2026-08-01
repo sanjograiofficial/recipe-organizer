@@ -6,6 +6,7 @@ const getAllUsersService = () => {
     select: {
       id: true,
       username: true,
+      profileImage: true,
       role: true,
       recipes: {
         select: {
@@ -25,7 +26,11 @@ const getMeService = (id: number) => {
     where: {
       id,
     },
-    include: {
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      role: true,
       recipes: {
         select: {
           id: true,
@@ -44,7 +49,11 @@ const getUserByIdService = (id: number) => {
     where: {
       id,
     },
-    include: {
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      role: true,
       recipes: {
         select: {
           id: true,
@@ -58,13 +67,30 @@ const getUserByIdService = (id: number) => {
   });
 };
 
-const updateUserService = (id: number, data: Prisma.UserUpdateInput) => {
+const updateUserService = async (
+  id: number,
+  userId: number,
+  data: Prisma.UserUpdateInput,
+) => {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existingUser) throw new Error("User not found");
+
+  if (existingUser.id !== userId) throw new Error("Forbidden");
+
   return prisma.user.update({
     where: {
       id,
     },
     data,
-    include: {
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      role: true,
       recipes: {
         select: {
           id: true,
@@ -78,12 +104,63 @@ const updateUserService = (id: number, data: Prisma.UserUpdateInput) => {
   });
 };
 
-const deleteUserService = (id: number) => {
+const uploadProfileService = async (
+  id: number,
+  userId: number,
+  profileImage: string,
+) => {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existingUser) throw new Error("User with that id not found");
+
+  if (existingUser.id !== userId) throw new Error("Forbidden");
+
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      profileImage,
+    },
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      role: true,
+      recipes: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          difficulty: true,
+          category: true,
+        },
+      },
+    },
+  });
+};
+
+const deleteUserService = async (id: number, userId: number) => {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (!existingUser) throw new Error("User with that id not found");
+
+  if (existingUser.id !== userId) throw new Error("Forbidden");
   return prisma.user.delete({
     where: {
       id,
     },
-    include: {
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      role: true,
       recipes: {
         select: {
           id: true,
@@ -102,5 +179,6 @@ export {
   getMeService,
   getUserByIdService,
   updateUserService,
+  uploadProfileService,
   deleteUserService,
 };
