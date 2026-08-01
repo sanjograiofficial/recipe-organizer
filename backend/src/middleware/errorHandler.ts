@@ -2,7 +2,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "../generated/prisma/client.js";
 import { ZodError } from "zod";
-import multer from "multer";
 
 const errorHandler = (
   err: any,
@@ -58,15 +57,6 @@ const errorHandler = (
         path: issue.path.join("."),
         message: issue.message,
       })),
-    });
-  }
-
-  // Multer Error
-  if (err instanceof multer.MulterError) {
-    return res.status(400).json({
-      success: false,
-      message: err.message,
-      code: err.code,
     });
   }
 

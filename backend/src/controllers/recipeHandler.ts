@@ -113,7 +113,7 @@ const updateRecipeImage = asyncHandler(async (req: Request, res: Response) => {
       message: "Forbidden",
     });
 
-  const imageUrl = `/uploads/${req.file?.filename}`;
+  const imageUrl = `/uploads/recipes/${req.file?.filename}`;
 
   // add image to recipe
   const recipe = await updateRecipeImageService(id, req.user.id, imageUrl);

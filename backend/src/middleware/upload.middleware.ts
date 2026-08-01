@@ -8,7 +8,14 @@ const dirpath = path.dirname(fileNamePath);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(dirpath, "..", "uploads"));
+     let uploadPath = "uploads";
+
+    if (file.fieldname === "profile") {
+      uploadPath = "uploads/profiles";
+    } else if (file.fieldname === "recipe") {
+      uploadPath = "uploads/recipes";
+    }
+    cb(null, path.join(dirpath, "..", uploadPath));
   },
   filename: (req, file, cb) => {
     const suffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
