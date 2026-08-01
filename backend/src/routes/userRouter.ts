@@ -5,10 +5,10 @@ import {
   getMe,
   getUserById,
   updateUser,
+  uploadProfile,
 } from "../controllers/userHandler.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import { upload } from "../middleware/upload.middleware.js";
-import { uploadImage } from "../controllers/uploadHandler.js";
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -20,13 +20,17 @@ const dirpath = path.dirname(fileNamePath);
 const router = Router();
 
 router.get("/", getAllUsers);
-router.get("/:id", getUserById);
 router.get("/me", authMiddleware, getMe);
+router.get("/:id", getUserById);
 router.put("/:id", authMiddleware, updateUser);
 router.delete("/:id", authMiddleware, deleteUser);
 
 // profile upload
-router.post("/profile", upload.single("profile"), uploadImage);
-router.use("/profile/img", express.static(path.join(dirpath, "..", '/uploads/profile')));
+router.put(
+  "/:id/profile",
+  authMiddleware,
+  upload.single("profile"),
+  uploadProfile,
+);
 
 export default router;

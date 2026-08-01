@@ -18,18 +18,19 @@ enum Roles {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String
-  email    String @unique
-  password String
-  role     Roles  @default(USER)
+  id           Int     @id @default(autoincrement())
+  username     String
+  profileImage String?
+  email        String  @unique
+  password     String
+  role         Roles   @default(USER)
 
   recipes Recipe[]
+  ingredients Ingredient[]
+  steps       Step[]
 
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
-  ingredients Ingredient[]
-  steps       Step[]
 }
 
 enum Categories {
@@ -91,9 +92,9 @@ model Step {
   recipeId Int
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 }
