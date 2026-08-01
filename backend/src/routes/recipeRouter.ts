@@ -35,7 +35,7 @@ router.post("/:recipeId/ingredients", authMiddleware, addIngredientToRecipe);
 router.post("/:recipeId/steps", authMiddleware, addStepToRecipe);
 
 // image upload
-router.put("/:id/image", upload.single("image"), updateRecipeImage);
-router.use("/", express.static(path.join(dirpath, "..", "/uploads/recipe")));
+router.put("/:id/image",authMiddleware, upload.single("recipe"), updateRecipeImage);
+router.use("/", express.static(path.join(dirpath, "..", "/uploads/recipes")));
 
 export default router;
