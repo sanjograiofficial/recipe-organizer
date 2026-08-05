@@ -72,7 +72,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     });
 
   // generate a token for the logged in user
-  const token = jwt.sign({ id: user.id }, secretKey, {
+  const token = jwt.sign({ id: user.id, role: user.role }, secretKey, {
     expiresIn: "3d",
   });
 

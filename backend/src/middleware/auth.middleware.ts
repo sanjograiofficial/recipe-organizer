@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import type { Roles } from "../generated/prisma/enums.js";
 
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) throw new Error("Secret key undefined");
@@ -21,7 +22,10 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
       message: "Token is missing",
     });
   try {
-    const decoded = jwt.verify(token, secretKey) as { id: number };
+    const decoded = jwt.verify(token, secretKey) as {
+      id: number;
+      role: Roles;
+    };
     req.user = decoded;
     next();
   } catch (e) {
@@ -31,4 +35,4 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default authMiddleware
+export default authMiddleware;
